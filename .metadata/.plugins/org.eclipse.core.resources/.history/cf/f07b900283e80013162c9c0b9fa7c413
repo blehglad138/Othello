@@ -1,0 +1,182 @@
+import info.gridworld.grid.BoundedGrid;
+import info.gridworld.grid.Grid;
+import info.gridworld.grid.Location;
+
+import java.util.*;
+import java.awt.Color;
+
+
+public class MinimaxOthelloPlayer extends OthelloPlayer
+{
+
+    private static Color whiteish = new Color( -2031617 );
+
+    private final int maxDepth = 4;
+
+    private int[][] posValues = { { 100, -25, 10, 5, 5, 10, -25, 100, },
+        { -25, -25, 1, 1, 1, 1, -25, -25, }, { 10, 1, 5, 2, 2, 5, 1, 10, },
+        { 5, 1, 2, 1, 1, 2, 1, 5, }, { 5, 1, 2, 1, 1, 2, 1, 5, },
+        { 10, 1, 5, 2, 2, 5, 1, 10, }, { -25, -25, 1, 1, 1, 1, -25, -25, },
+        { 100, -25, 10, 5, 5, 10, -25, 100, }, };;
+
+
+    public MinimaxOthelloPlayer( OthelloWorld w )
+    {
+        super( w, "Computer", whiteish );
+    }
+
+
+    // commenting out the flipAll in this method does nothing
+    @Override
+    public Location getPlay()
+    {
+        ArrayList<Location> moves = getAllowedPlays( getGrid(), whiteish );
+        Grid<Piece> copyGrid = copyGrid( getGrid() );
+        copyGrid.put( moves.get( 0 ), new Piece( getColor() ) );
+        flipAll( moves.get( 0 ), copyGrid, getColor() );
+        int bestVal = valueOfBoard( getColor(), copyGrid, maxDepth );
+        Location bestLoc = moves.get( 0 );
+        for ( int i = 1; i < moves.size(); i++ )
+        {
+            Location m = moves.get( i );
+            copyGrid = copyGrid( getGrid() );
+            copyGrid.put( m, new Piece( getColor() ) );
+            flipAll( m, copyGrid, getColor() );
+            int curVal = valueOfBoard( getColor(), copyGrid, maxDepth );
+            if ( curVal > bestVal
+                || ( curVal == bestVal && Math.random() >= 0.5 ) )
+            {
+                bestVal = curVal;
+                bestLoc = m;
+            }
+        }
+
+        return bestLoc;
+    }
+
+
+    private int evaluate( Grid<Piece> grid, Color col )
+    {
+        int value = 0;
+        for ( Location loc : grid.getOccupiedLocations() )
+        {
+            if ( grid.get( loc ) != null )
+            {
+                int pieceVal = 1 + posValues[loc.getRow()][loc.getCol()];
+                // System.out.println( loc + " has value " + pieceVal );
+                value += ( grid.get( loc ).getColor().equals( col ) ) ? pieceVal
+                    : -pieceVal;
+            }
+        }
+        return value;
+    }
+
+
+    public int minimax( Color col, Grid<Piece> grid, int depth )
+    {
+
+        if ( depth <= 0 )
+        {
+            return evaluate( grid, col );
+        }
+        ArrayList<Location> moves = getAllowedPlays( grid, col );
+
+        if ( moves.isEmpty() )
+        {
+            return evaluate( grid, col );
+        }
+
+        // printActualGrid();
+        Grid<Piece> copyGrid = copyGrid( grid );
+        copyGrid.put( moves.get( 0 ), new Piece( col ) );
+        flipAll( moves.get( 0 ), copyGrid, col );
+        int bestVal = valueOfBoard( col, copyGrid, depth - 1 );
+        for ( int i = 1; i < moves.size(); i++ )
+        {
+            Location m = moves.get( i );
+            // printActualGrid();
+            copyGrid = copyGrid( grid );
+            // printGrid( copyGrid );
+            copyGrid.put( m, new Piece( col ) );
+            flipAll( m, copyGrid, col );
+            // System.out.println( "Flipped stuff around " + m );
+            int curVal = valueOfBoard( col, copyGrid, depth - 1 );
+            if ( curVal > bestVal
+                || ( curVal == bestVal && Math.random() >= 0.5 ) )
+            {
+                // System.out.println( "Current best: " + bestVal );
+                bestVal = curVal;
+            }
+        }
+        return bestVal;
+    }
+
+
+    public int valueOfBoard( Color col, Grid<Piece> grid, int depth )
+    {
+        Color opCol = ( col.equals( whiteish ) ) ? Color.BLACK : whiteish;
+        return -minimax( opCol, grid, depth );
+    }
+
+
+    private Grid<Piece> copyGrid( Grid<Piece> grid )
+    {
+        Grid<Piece> copyGrid = new BoundedGrid<Piece>( 8, 8 );
+        for ( int column = 0; column < grid.getNumCols(); column++ )
+        {
+            for ( int row = 0; row < grid.getNumRows(); row++ )
+            {
+                Location l = new Location( row, column );
+                if ( grid.get( l ) != null )
+                {
+                    copyGrid.put( l, new Piece( grid.get( l ).getColor() ) );
+                    // System.out.println( "copied" + l + " "
+                    // + grid.get( l ).getColor() );
+                }
+            }
+        }
+        // System.out.println( "finish 1 copy" );
+
+        // for( int i = 0; i < copyGrid.getNumRows(); i++ )
+        // {
+        // for( int k = 0; i < copyGrid.getNumCols(); i++ )
+        // {
+        // copyGrid.put( new Location( i, k), new Piece( whiteish) );
+        // }
+        // }
+        return copyGrid;
+    }
+
+
+    private void flipAll( Location loc, Grid<Piece> grid, Color col )
+    {
+        for ( Location adjacent : grid.getOccupiedAdjacentLocations( loc ) )
+        {
+            Location next = getNextLocationWithColor( loc, adjacent, col, grid );
+            // System.out.println( "checking: " + next );
+            if ( next != null && !next.equals( adjacent ) && !next.equals( loc ) )
+            {
+                flipColorOfPieces( adjacent, next, col, grid );
+                // System.out.println( "flipped " + next );
+            }
+        }
+    }
+
+
+    protected void flipColorOfPieces(
+        Location start,
+        Location end,
+        Color col,
+        Grid<Piece> tGrid )
+    {
+        int dir = start.getDirectionToward( end );
+        Location current = start;
+
+        while ( !tGrid.get( current ).equals( tGrid.get( end ) ) )
+        {
+            tGrid.get( current ).setColor( col );
+            current = current.getAdjacentLocation( dir );
+        }
+    }
+
+}

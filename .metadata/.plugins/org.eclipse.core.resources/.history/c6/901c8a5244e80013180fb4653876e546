@@ -1,0 +1,251 @@
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.*;
+
+import info.gridworld.grid.Grid;
+import info.gridworld.grid.Location;
+import info.gridworld.world.World;
+
+import java.awt.*;
+
+
+public class PickLevels extends JFrame implements ActionListener
+{
+
+    private JRadioButton easy, medium, hard, human, impossible; // human for
+                                                                // multiplayer
+
+    private JRadioButton first, second;
+
+    // private Box whoGoes;
+
+    private ButtonGroup difficulty;
+
+    private Box difficultBox;
+
+    private JRadioButton local, online;
+
+    private ButtonGroup connection;
+
+    private Box connectionBox;
+
+    private JLabel playerOne, playerTwo;
+
+    private JTextField pOneName, pTwoName; // pTwoName will be blacked out if
+                                           // they pick human, otherwise delete
+                                           // this field and just not have
+                                           // names
+
+    private JPanel nameOne;
+
+    private JPanel nameTwo;
+
+    private JButton proceed;
+
+    private boolean shouldplay;
+
+    private String info = "";
+
+    private JPanel panel;
+
+
+    /*
+     * need to add this in runner PickLevels window = new PickLevels(
+     * "Safe Trade", safeTrade );
+     */
+    public PickLevels()
+    {
+        setTitle( "Pick your difficulty, enter in  your name and choose connection" );
+        setDefaultCloseOperation( EXIT_ON_CLOSE );
+
+        human = new JRadioButton( "Human Opponent", true );
+        easy = new JRadioButton( "Easy", false );
+        medium = new JRadioButton( "Medium", false );
+        hard = new JRadioButton( "Hard", false );
+        impossible = new JRadioButton( "IMPOSSIBRU!!!", false );
+
+        easy.setActionCommand( "no player 2" );
+        medium.setActionCommand( "no player 2" );
+        hard.setActionCommand( "no player 2" );
+        impossible.setActionCommand( "no player 2" );
+        human.setActionCommand( "2 player" );
+        human.addActionListener( this );
+        easy.addActionListener( this );
+        medium.addActionListener( this );
+        hard.addActionListener( this );
+        impossible.addActionListener( this );
+
+        difficulty = new ButtonGroup();
+        difficulty.add( human );
+        difficulty.add( easy );
+        difficulty.add( medium );
+        difficulty.add( hard );
+        difficulty.add( impossible );
+
+        difficultBox = new Box( BoxLayout.X_AXIS );
+        difficultBox.add( new JLabel( "Difficulty" ) );
+        difficultBox.add( Box.createRigidArea( new Dimension( 1, 8 ) ) );
+        difficultBox.add( human );
+        difficultBox.add( easy );
+        difficultBox.add( medium );
+        difficultBox.add( hard );
+        difficultBox.add( impossible );
+        difficultBox.add( Box.createRigidArea( new Dimension( 1, 40 ) ) );
+
+        // connection
+        local = new JRadioButton( "Local Connection", true );
+        online = new JRadioButton( "Networked Connection", false );
+        local.setActionCommand( "local" );
+        online.setActionCommand( "online" );
+        local.addActionListener( this );
+        online.addActionListener( this );
+
+        connection = new ButtonGroup();
+        connection.add( local );
+        connection.add( online );
+
+        connectionBox = new Box( BoxLayout.X_AXIS );
+        connectionBox.add( new JLabel( "Connection" ) );
+        connectionBox.add( Box.createRigidArea( new Dimension( 1, 8 ) ) );
+        connectionBox.add( local );
+        connectionBox.add( online );
+        connectionBox.add( Box.createRigidArea( new Dimension( 1, 50 ) ) );
+
+        // Label for player names
+        playerOne = new JLabel( "Player One" );
+        playerTwo = new JLabel( "Player Two" );
+
+        // Text field
+        pOneName = new JTextField( 20 );
+        pOneName.setText( "Player 1" );
+        pTwoName = new JTextField( 20 ); // set this editable to false if they
+        pTwoName.setText( "Player 2" ); // select single player
+
+        nameOne = new JPanel();
+        nameTwo = new JPanel();
+        nameOne.add( playerOne );
+        nameOne.add( pOneName );
+        nameTwo.add( playerTwo );
+        nameTwo.add( pTwoName );
+
+        proceed = new JButton( "Play" );
+        proceed.setActionCommand( "play" );
+        proceed.addActionListener( this );
+        Box bottom = new Box( BoxLayout.X_AXIS );
+        bottom.add( Box.createRigidArea( new Dimension( 1, 8 ) ) );
+        bottom.add( proceed );
+
+        // Frame
+        setLayout( new BoxLayout( getContentPane(), BoxLayout.Y_AXIS ) );
+        add( connectionBox );
+        add( difficultBox );
+        add( nameOne );
+        add( nameTwo );
+        add( bottom );
+        shouldplay = false;
+    }
+
+
+    public void actionPerformed( ActionEvent evt )
+    {
+        if ( ( evt.getActionCommand().equals( "no player 2" ) ) )
+        {
+            pTwoName.setEditable( false );
+        }
+        else if ( evt.getActionCommand().equals( "2 player" ) )
+        {
+            if ( online.isSelected() )
+            {
+                pTwoName.setEditable( false );
+            }
+            else
+            {
+                pTwoName.setEditable( true );
+            }
+        }
+        if ( evt.getActionCommand().equals( "online" ) )
+        {
+            pTwoName.setEditable( false );
+            pOneName.setEditable( false ); // no need for it
+        }
+        if ( evt.getActionCommand().equals( "local" ) )
+        {
+            pOneName.setEditable( true );
+            pTwoName.setEditable( true );
+        }
+
+        if ( evt.getActionCommand().equals( "play" ) )
+        {
+            if ( local.isSelected() )
+            {
+                String p1name = ( pOneName.getText().isEmpty() ) ? "Player 1"
+                    : pOneName.getText();
+                String p2name = "";
+                String diff = "easy";
+                if ( pTwoName.isEditable() )
+                {
+                    p2name = ( pTwoName.getText().isEmpty() ) ? "Player 2"
+                        : pTwoName.getText();
+                }
+                if ( easy.isSelected() )
+                {
+                    diff = "Easy";
+                }
+                else if ( medium.isSelected() )
+                {
+                    diff = "Medium";
+                }
+                else if ( hard.isSelected() )
+                {
+                    diff = "Hard";
+                }
+                else if ( impossible.isSelected() )
+                {
+                    diff = "Impossible";
+                }
+                else if ( human.isSelected() )
+                {
+                    diff = "Human";
+                }
+                info += diff + ", " + p1name + ", " + p2name;
+                this.setVisible( false );
+
+            }
+            else if ( online.isSelected() )
+            {
+                if ( easy.isSelected() || medium.isSelected()
+                    || hard.isSelected() || impossible.isSelected() )
+                {
+                    if ( evt.getActionCommand().equals( "play" ) )
+                    {
+                        // it closes pickLevels when I dont want it to
+                        JOptionPane.showMessageDialog( null,
+                            "You cannot choose a difficulty if you're playing online",
+                            "Error",
+                            JOptionPane.WARNING_MESSAGE );
+                        setVisible( true );
+                    }
+                }
+                else
+                {
+                    setVisible( false );
+                    info += "network, ";
+                }
+            }
+            shouldplay = true;
+        }
+    }
+
+
+    public boolean shouldPlay()
+    {
+        return shouldplay;
+    }
+
+
+    public String info()
+    {
+        return info;
+    }
+}

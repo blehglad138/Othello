@@ -1,0 +1,5 @@
+INDEX VERSION 1.127+C:\Users\bunny_000\Dropbox\Othello Game\.metadata\.plugins\org.eclipse.jdt.core
+2706502329.index
+2003861885.index
+1195621138.index
+1848778671.index

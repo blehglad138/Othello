@@ -1,0 +1,118 @@
+import static org.junit.Assert.*;
+import junit.framework.JUnit4TestAdapter;
+
+import org.junit.Test;
+
+import info.gridworld.grid.Location;
+
+import java.awt.Color;
+
+
+/**
+ * Testing to make sure that every method works as intended
+ * 
+ * @author Patrick Lee
+ * @version May 21, 2014
+ * @author Period: TODO
+ * @author Assignment: GWOthello
+ * 
+ * @author Sources: TODO
+ */
+public class JUnitTestOthello
+{
+    /** The world */
+    private OthelloWorld world;
+
+    /** The array of two players (human, computer) */
+    private OthelloPlayer[] players;
+
+
+    // Othello Game test
+    @Test
+    public void othelloGameConstructor1()
+    {
+        OthelloGame g = new OthelloGame( false );
+        assertNotNull( g );
+    }
+
+
+    @Test
+    public void othelloGameConstructor2()
+    {
+        OthelloGame g = new OthelloGame( false );
+        assertNotNull( g.getOthelloWorld() );
+    }
+
+
+    @Test
+    public void othelloGameConstructor3()
+    {
+        OthelloGame g = new OthelloGame( false, "easy", "bill", "boog" );
+        assertNotNull( g.getOthelloWorld() );
+    }
+
+
+    @Test
+    public void othelloGameConstructor4()
+    {
+        OthelloGame g = new OthelloGame( false, "easy", "bill" );
+        assertNotNull( g.getOthelloWorld() );
+    }
+
+
+    @Test
+    public void othelloGamePlayGame()
+    {
+        OthelloGame g = new OthelloGame( false, "easy", "bill", "boog" );
+        OthelloPlayer[] players = {
+            new MediumAI( g.getOthelloWorld(), Color.BLACK ),
+            new MediumAI( g.getOthelloWorld() ) };
+        g.setPlayers( players );
+        OthelloWorld w = g.getOthelloWorld();
+        for ( int row = 0; row < w.getGrid().getNumRows(); row++ )
+        {
+            for ( int col = 0; col < w.getGrid().getNumCols(); col++ )
+            {
+                Location l = new Location( row, col );
+                if ( w.getGrid().get( l ) == null )
+                    w.getGrid().put( l, new Piece( Color.BLACK ) );
+                else
+                    w.getGrid().get( l ).setColor( Color.BLACK );
+            }
+        }
+        g.playGame();
+        assertTrue( g.toString().contains( "Black won!" ) );
+    }
+
+
+    // Battery of AI tests
+    @Test
+    public void stupidAIconstructor()
+    {
+        OthelloGame g = new OthelloGame( false, "easy", "Bob", "boog" );
+        assertNotNull( g.getPlayers()[1] );
+    }
+
+
+    @Test
+    public void stupidAiGetPlay()
+    {
+        OthelloGame g = new OthelloGame( false, "easy", "Bob", "boog" );
+        assertTrue( g.getOthelloWorld()
+            .getGrid()
+            .isValid( g.getPlayers()[1].getPlay() ) );
+    }
+
+
+    public static junit.framework.Test suite()
+    {
+        return new JUnit4TestAdapter( JUnitTestOthello.class );
+    }
+
+
+    public static void main( String args[] )
+    {
+        org.junit.runner.JUnitCore.main( "JUnitTestOthello" );
+    }
+
+}

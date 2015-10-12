@@ -1,0 +1,224 @@
+import info.gridworld.grid.Grid;
+import info.gridworld.grid.Location;
+import info.gridworld.world.World;
+
+import java.awt.Color;
+import java.net.Socket;
+import java.util.Scanner;
+
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
+
+
+
+/*
+ * Hi Charlie so you should probably make a private boolean variable to remember
+ * if this is a networked game pretty much do what tilegame does but make sure
+ * that it only acts like a tilegame if networking is on.
+ * 
+ * Cool
+ */
+
+/**
+ * OthelloGame.java
+ * 
+ * An <CODE>OthelloGame</CODE> object represents an Othello game.
+ * 
+ * @author Patrick Lee
+ * @author 5111742
+ * @version 4/4/13
+ * @author Period: 3
+ * @author Assignment: GWOthello
+ * 
+ * @author Sources: None
+ */
+public class OthelloGame extends World<Piece> implements ChatDisplay {
+	/** The world */
+	private OthelloWorld world;
+
+	/** The array of two players (human, computer) */
+	private OthelloPlayer[] players;
+
+	/** The index into players for the next player to play */
+	private int playerIndex;
+
+	protected ChatConnectionHandler networker;
+
+	/** Data model for connections list */
+	protected DefaultListModel connModel;
+
+	/** List of active connections */
+	protected JList connections;
+
+	private boolean online;
+
+	/** Default port to connect to on remote hosts */
+	public static final int DEFAULT_PORT = 1337;
+
+	private int port = DEFAULT_PORT;
+
+	private static Color whiteish = new Color(-2031617);
+
+	public String result = "";
+
+	/**
+	 * Constructs an Othello game and displays the grid<br>
+	 */
+	public OthelloGame() {
+		world.show();
+		world.getFrame().setSize(442, 526);
+	}
+
+	/**
+	 * Constructs an Othello game.<br>
+	 * Postcondition: <CODE>players.length == 2</CODE>; <CODE>players[0]</CODE>
+	 * contains a human Othello player; <CODE>players[1]</CODE> contains a
+	 * computer Othello player; The world has been shown.
+	 * 
+	 * @param show
+	 *            if true world is displayed. Used for testing
+	 */
+	public OthelloGame(boolean show) {
+		world = new OthelloWorld(this);
+		players = new OthelloPlayer[2];
+		players[0] = new HumanOthelloPlayer(world);
+		players[1] = new MediumAI(world);
+		playerIndex = 0;
+		if (show) {
+			world.show();
+			world.getFrame().setSize(442, 526);
+		}
+	}
+
+	public OthelloGame(boolean show, String ai, String p1name, String p2name) {
+		world = new OthelloWorld(this);
+		players = new OthelloPlayer[2];
+		players[0] = new HumanOthelloPlayer(world, p1name, Color.BLACK);
+		if (ai.equals("Human")) {
+			players[1] = new HumanOthelloPlayer(world, p2name, whiteish);
+		} else if (ai.equals("Easy")) {
+			players[1] = new StupidComputerOthelloPlayer(world);
+		} else if (ai.equals("Medium")) {
+			players[1] = new MediumAI(world);
+		} else if (ai.equals("Hard")) {
+			players[1] = new MinimaxOthelloPlayer(world);
+		} else if (ai.endsWith("Impossible")) {
+			players[1] = new ImpossibleAI(world);
+		}
+		if (show) {
+			world.show();
+			world.getFrame().setSize(442, 526); // was 442 by 552 with button
+		}
+	}
+
+	public OthelloGame(boolean show, String ai, String p1name) {
+		this(show, ai, p1name, "");
+	}
+
+	
+	/**
+	 * Plays the game until it is over (no player can play).
+	 */
+	public void playGame() {
+		while (true) {
+			OthelloPlayer othello = players[playerIndex];
+			if (othello.canPlay())
+				othello.play();
+			playerIndex = (playerIndex == 0) ? 1 : 0;
+			world.setMessage(toString());
+		}
+	}
+
+	/**
+	 * Creates a string with the current game state. (used for the GUI message).
+	 */
+	public String toString() {
+		int numBlack = 0;
+		int numWhite = 0;
+
+		Grid<Piece> board = world.getGrid();
+
+		for (Location loc : board.getOccupiedLocations())
+			if (board.get(loc).getColor().equals(Color.BLACK))
+				numBlack++;
+			else
+				numWhite++;
+
+		String result = "Black: " + numBlack + "    white: " + numWhite + "\n";
+		if (!players[0].canPlay() && !players[1].canPlay())
+			if (numBlack > numWhite) {
+				result += "Black won!";
+			} else if (numBlack < numWhite) {
+				result += "White won!";
+			} else {
+				result += "It's a tie!";
+			}
+		else
+			result += players[playerIndex].getName() + " to play.";
+
+		return result;
+	}
+
+	public String getResult() {
+		return result;
+	}
+
+	// accessors used primarily for testing
+
+	protected OthelloWorld getOthelloWorld() {
+		return world;
+	}
+
+	protected OthelloPlayer[] getOthelloPlayer() {
+		return players;
+	}
+
+	protected int getPlayerIndex() {
+		return playerIndex;
+	}
+
+	// @Override
+	public void statusMessage(String message) {
+		setMessage(message);
+	}
+	
+    public OthelloWorld getWorld()
+    {
+    	return world;
+    }
+
+	// not even running this method
+	// @Override
+	public void chatMessage(SocketName name, String message) { // chat sender
+																// isn't working
+		setMessage(name + ": " + message);
+		int space = message.indexOf(",");
+		int r = Integer.parseInt(message.substring(0, space));
+		System.out.println(r);
+		System.out.println(message.substring(0, space));
+		int c = Integer.parseInt(message.substring(space + 1,
+				message.indexOf(",", space + 1)));
+		int player = Integer.parseInt(message.substring(message.indexOf(",",
+				space + 1)));
+		Color col = (player == 0) ? Color.BLACK : whiteish;
+		locationClicked(new Location(r, c), col, false);
+	}
+
+
+	
+    public void setWorld( OthelloGame cg, int port )
+    {
+    	world = new NetworkWorld( cg, port );
+    	world.show();
+    }
+    
+    public void setPlayers( OthelloPlayer[] cp )
+    {
+    	players = cp;
+    }
+
+	
+	public OthelloPlayer[] getPlayers() {
+		return players;
+	}
+}

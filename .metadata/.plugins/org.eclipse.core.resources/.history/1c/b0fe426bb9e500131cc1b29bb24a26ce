@@ -1,0 +1,37 @@
+
+/**
+ * OthelloRunner.java
+ * 
+ * Application that creates a new Othello game and plays it.
+ * 
+ *  @author  Patrick Lee
+ *  @author  5111742
+ *  @version 4/4/13
+ *  @author  Period: 3
+ *  @author  Assignment: GWOthello
+ * 
+ *  @author  Sources: None
+ */
+public class OthelloRunner
+{
+	public static void main(String[] args)
+	{
+	    PickLevels levels = new PickLevels();
+	    levels.setSize( 400, 255 );
+        levels.setVisible( true );
+        
+        String info = "";
+        while( info.length() == 0 )
+        info = levels.info();
+        int i = info.indexOf( ", " );
+        int i2 = info.indexOf( ",  " , i+1 );
+        System.out.println(info.substring(0, i));
+        System.out.println("HI" +info.substring(i, i2)); // goes out of bounds
+        System.out.println(info.substring(i2, info.length()-1));
+        OthelloGame game = new OthelloGame( true, info.substring(0, i ), info.substring( i, i2 ), info.substring( i2, info.length()-1 ));
+
+        game.playGame();
+//	    OthelloGame game = new OthelloGame( true, "Hard", "Charlie");
+//	    game.playGame();
+	}
+}

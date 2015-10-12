@@ -1,0 +1,27 @@
+
+/**
+ * OthelloRunner.java
+ * 
+ * Application that creates a new Othello game and plays it.
+ * 
+ *  @author  Patrick Lee
+ *  @author  5111742
+ *  @version 4/4/13
+ *  @author  Period: 3
+ *  @author  Assignment: GWOthello
+ * 
+ *  @author  Sources: None
+ */
+public class OthelloRunner
+{
+	public static void main(String[] args)
+	{
+//	    PickLevels levels = new PickLevels();
+//	    levels.setSize( 400, 255 );
+//        levels.setVisible( true );
+        
+	    
+	    OthelloGame game = new OthelloGame( true, "Medium", "Patrick");
+	    game.playGame();
+	}
+}

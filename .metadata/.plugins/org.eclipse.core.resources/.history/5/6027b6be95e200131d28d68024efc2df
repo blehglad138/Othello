@@ -1,0 +1,219 @@
+import static org.junit.Assert.*;
+
+import junit.framework.JUnit4TestAdapter;
+
+import org.junit.Test;
+
+import info.gridworld.grid.Location;
+
+import java.awt.Color;
+
+
+/**
+ * Testing to make sure that every method works as intended
+ * 
+ * @author Patrick Lee
+ * @version May 21, 2014
+ * @author Period: TODO
+ * @author Assignment: GWOthello
+ * 
+ * @author Sources: TODO
+ */
+public class JUnitTestOthello
+{
+    /** The world */
+    private OthelloWorld world;
+
+    /** The array of two players (human, computer) */
+    private OthelloPlayer[] players;
+
+    private OthelloGame g = new OthelloGame(true);
+
+
+    // Othello Game test
+    @Test
+    public void othelloGameConstructor()
+    {
+        OthelloGame g = new OthelloGame(true);
+        assertNotNull( g );
+    }
+
+
+    @Test
+    public void othelloGameConstructor2()
+    {
+        OthelloGame g = new OthelloGame( true );
+        assertNotNull( g.getOthelloWorld() );
+    }
+
+
+    @Test
+    public void othelloGameConstructor3()
+    {
+
+    }
+
+
+    @Test
+    public void othelloGamePlay()
+    {
+        OthelloGame g = new OthelloGame();
+        // g.getOthelloPlayer();
+        // g.getPlayerIndex();
+    }
+
+
+    @Test
+    public void othelloGameToString()
+    {
+        // do i need this one?
+    }
+
+    // Othello World test
+
+    OthelloWorld w = new OthelloWorld( g ); // do I need to say w. whatever?
+
+
+    @Test
+    public void othelloWorldConstructor()
+    {
+
+        Location loc = new Location( 3, 3 );
+        assertNotNull( loc );
+    }
+
+
+    @Test
+    public void othelloWorldClick()
+    {
+        Location loc = new Location( 3, 5 ); // circular test :P
+        assertTrue( w.locationClicked( loc ) );
+    }
+
+
+    @Test
+    public void othelloWorldSetLoc()
+    {
+
+    }
+
+
+    @Test
+    public void othelloWorlPlayerLoc()
+    {
+
+    }
+
+    //OthelloPlayer tests..........IT'S ABSTRACT SO CAN'T TEST
+    @Test
+    public void othelloPConstructor()
+    {
+        // can't test it's abstract
+    }
+
+    // Pick Levels
+    @Test
+    public void pickLevelsConstructor()
+    {
+        PickLevels pl = new PickLevels();
+        assertNotNull( pl );
+    }
+
+
+    @Test
+    public void pickLevelsActionPerf()
+    {
+        // do i need this one?
+    }
+
+    // MediumAI
+    private MediumAI ma = new MediumAI( world );
+
+
+    @Test
+    public void mediumAIConstructor()
+    {
+        assertNotNull( ma );
+    }
+
+
+    @Test
+    public void mediumAIConstructor2()
+    {
+        MediumAI ma = new MediumAI( world, Color.GREEN );
+        assertNotNull( ma ); // just make sure that it makes it.
+    }
+
+
+    @Test
+    public void mediumAIGetPlay()
+    {
+        assertTrue( ma.getPlay() != null );
+        // null might not work since key is initialized to null at first
+    }
+
+
+    // for this one I could also change the method to protected
+    @Test
+    public void mediumAIFlipColor()
+    {
+        assertTrue( ma.getFlipColor() == 0 );
+        // 0 since nothing is done
+    }
+
+
+    // for this one I could also change the method to protected
+    @Test
+    public void mediumAIValue()
+    {
+        assertTrue( ma.valueCalcVal() == 0 );
+    }
+    
+    //Stupid Othello Person
+    StupidComputerOthelloPlayer p = new StupidComputerOthelloPlayer(world);
+    @Test
+    public void stupidOthelloConstructor()
+    {
+
+        assertNotNull(p);
+    }
+    
+    @Test
+    public void stupidOthelloGetPlay()
+    {
+        assertTrue(p.canPlay() == false);
+    }
+    
+    //HumanOthelloPlayer Test
+    HumanOthelloPlayer playa = new HumanOthelloPlayer(world);
+    HumanOthelloPlayer playaCol = new HumanOthelloPlayer(world, Color.black);
+    HumanOthelloPlayer playaName = new HumanOthelloPlayer(world, "", Color.black);
+    @Test
+    public void humanPlayerConstructor()
+    {
+        assertNotNull(playa);
+        assertNotNull(playaCol);
+        assertNotNull(playaName);
+    }
+    
+    @Test
+    public void humanPlayerPlay()
+    {
+        assertTrue(playa.getPlay() == null);
+    }
+    
+    
+
+
+    public static junit.framework.Test suite()
+    {
+        return new JUnit4TestAdapter( JUnitTestOthello.class );
+    }
+
+
+    public static void main( String args[] )
+    {
+        org.junit.runner.JUnitCore.main( "JUnitTestOthello" );
+    }
+
+}
